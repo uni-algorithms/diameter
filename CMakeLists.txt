@@ -28,7 +28,6 @@ include_directories(cmake-build-debug/catch-src/single_include/catch2)
 
 add_executable(out main.cpp)
 add_executable(test test.cpp)
-add_executable(prova diametro.cpp)
 
 configure_file(
         ${CMAKE_CURRENT_SOURCE_DIR}/input.txt
