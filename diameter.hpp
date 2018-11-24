@@ -48,13 +48,11 @@ function<int(const node)> max_erdos(const graph &g) {
         queue<node> q;
         q.push(n);
 
-        while (!q.empty()) {
-            auto u = q.front();
-            auto e = erdos.find(u)->second;
-            q.pop();
-            for (node a : g.find(u)->second) {
-                if (!contains(erdos, a)) {
-                    erdos.insert({a, e + 1});
+        for (; !q.empty(); q.pop()) {
+            const auto u = q.front();
+            const auto e = erdos.find(u)->second;
+            for (const auto a : g.find(u)->second) {
+                if (erdos.insert({a, e + 1}).second) {
                     q.push(a);
                 }
             }
