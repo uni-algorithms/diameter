@@ -3,7 +3,6 @@
 
 #include <algorithm>
 #include <fstream>
-#include <iostream>
 #include <functional>
 #include <unordered_set>
 #include <unordered_map>
@@ -23,19 +22,14 @@ void add_arch(graph &g, const node &a, const node &b) {
     g.find(a)->second.insert(b);
 }
 
-unordered_set<node> adj(const graph &g, const node &n) {
-    auto it = g.find(n);
-    return it == end(g) ? unordered_set<node>() : it->second;
-}
-
-template<typename K, typename V>
-V take_second(const pair<K, V> &p) {
-    return p.second;
-}
-
 template<typename K, typename V>
 K take_first(const pair<K, V> &p) {
     return p.first;
+}
+
+template<class OutputIterator>
+void nodes(const graph &g, OutputIterator out) {
+    transform(begin(g), end(g), out, take_first<node, unordered_set<node>>);
 }
 
 template<typename K, typename V>
@@ -58,7 +52,7 @@ function<int(const node)> max_erdos(const graph &g) {
             auto u = q.front();
             auto e = erdos.find(u)->second;
             q.pop();
-            for (node a : adj(g, u)) {
+            for (node a : g.find(u)->second) {
                 if (!contains(erdos, a)) {
                     erdos.insert({a, e + 1});
                     q.push(a);
@@ -70,22 +64,15 @@ function<int(const node)> max_erdos(const graph &g) {
     };
 }
 
-template<typename T, typename K, typename V>
-function<T(const pair<K, V>)> firsts(const function<T(const K)> &op) {
-    return [&](const pair<K, V> &p) {
-        return op(p.first);
-    };
-}
-
 int max_diameter(const graph &g) {
+    unordered_set<int> ns;
+    nodes(g, inserter(ns, begin(ns)));
     unordered_set<int> ds;
-    transform(begin(g), end(g), inserter(ds, begin(ds)), firsts<int, node, unordered_set<node>>(max_erdos(g)));
+    transform(begin(ns), end(ns), inserter(ds, begin(ds)), max_erdos(g));
     return *max_element(begin(ds), end(ds));
 }
 
-graph from_stream(std::istream &input, const int nodes, const int arches) {
-    graph g;
-
+void from_stream(graph &g, istream &input, const int nodes, const int arches) {
     for (node n = 0; n < nodes; n++) {
         add_node(g, n);
     }
@@ -98,15 +85,16 @@ graph from_stream(std::istream &input, const int nodes, const int arches) {
         add_arch(g, a, b);
         add_arch(g, b, a);
     }
-    return g;
 }
 
-int diameter(std::istream &input) {
+int diameter(istream &input) {
     int n;
     int m;
 
     input >> n >> m;
-    return max_diameter(from_stream(input, n, m));
+    graph g;
+    from_stream(g, input, n, m);
+    return max_diameter(g);
 }
 
 #endif //DIAMETER_HPP

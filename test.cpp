@@ -56,6 +56,9 @@ TEST_CASE("from stream should work") {
                          "4 3\n"
                          "3 5");
 
+    graph actual;
+    from_stream(actual, in, 6, 7);
+
     graph expected = {{0, {2, 4}},
                       {1, {4}},
                       {2, {0, 3, 4}},
@@ -63,5 +66,5 @@ TEST_CASE("from stream should work") {
                       {4, {0, 1, 2, 3}},
                       {5, {3}}};
 
-    REQUIRE(from_stream(in, 6, 7) == expected);
+    REQUIRE(actual == expected);
 }
